@@ -36,7 +36,30 @@ Alternativ starten `start.cmd` unter Windows und `./start.sh` unter Linux die An
 
 Ein Test ohne Ergometer und Strava-Upload ist mit `simulate` möglich, etwa `./ErgoStravaLogger simulate --config config.local.json` beziehungsweise `.\ErgoStravaLogger.exe simulate --config config.local.json`. Er erzeugt synthetische Trainingsdateien unter dem konfigurierten Datenordner in `simulation/`.
 
-## Auf einem Docker-Server starten
+## Linux-Docker mit fertigem Image
+
+Das [Docker-Startpaket v1.0.0](https://github.com/compunited/ErgoStravaLogger/releases/download/v1.0.0/ErgoStravaLogger-v1.0.0-docker.zip) enthält die Compose-Datei und Konfigurationsvorlagen für `ghcr.io/compunited/ergostravalogger:v1.0.0`. Das Image unterstützt **Linux amd64 und ARM64**, einschließlich Raspberry Pi OS mit 64 Bit. Ein lokaler Build und ein .NET-SDK sind dafür nicht nötig; benötigt werden Docker Engine und das Compose-Plugin auf Linux.
+
+Entpacke das Startpaket in einen eigenen Ordner auf dem Server, wechsle dorthin und bereite für eine neue Installation die lokalen Dateien vor:
+
+```sh
+cp .env.example .env
+cp config.json config.local.json
+mkdir -p data
+chmod 600 .env config.local.json
+```
+
+Trage in `.env` die Ergometer-IP als `ERGO_IP` ein und setze `CONFIG_FILE=./config.local.json`. Das Image-Tag ist über `ERGO_IMAGE_TAG` standardmäßig auf `v1.0.0` festgelegt. Danach:
+
+```sh
+docker compose pull
+docker compose up -d
+docker compose logs -f
+```
+
+Das Webinterface öffnet sich unter `http://<server-ip>:8080`. Konfiguration, Tokens und Trainings bleiben auf dem Host erhalten. Die [ausführliche Docker-Anleitung](docs/docker-image.md) erklärt Cockpiteinstellungen, Strava, Updates, Backups und das Host-Netzwerk für die optionale Zwift-Bridge. Diese Installation verwendet die Compose-Datei aus dem Docker-Startpaket; die folgende Variante baut das Image aus einem Quellcode-Checkout.
+
+## Docker aus dem Quellcode bauen
 
 1. Das [Repository](https://github.com/compunited/ErgoStravaLogger) auf den Server klonen oder als Quellcodearchiv herunterladen.
 2. `.env.example` nach `.env` kopieren und `ERGO_IP` auf die LAN-IP des Premium 8i setzen. Reserviere die IP im Router. Bei Bedarf `WEB_PORT` anpassen.
@@ -89,7 +112,7 @@ Wenn das Daum-Cockpit eine aktive Gangschaltung meldet, übernimmt die Bridge im
 
 Für automatische Belastung **Zwift steuert Widerstand** separat einschalten und die Bridge in Zwift zusätzlich unter **Widerstand** koppeln. Die Steuerung ist standardmäßig aus. **ERG** sendet die von Zwift gewünschte Wattzahl an das Cockpit; die Gangwahl verändert sie nicht. Für **Streckenfahrten** berechnet die Bridge eine Wattvorgabe aus Zwift-Steigung, Roll- und Windwiderstand sowie Kadenz und virtuellem Gang. Die vom Daum berechnete Geschwindigkeit wird dafür nicht verwendet. Mit **− / +** im Dashboard wählst du einen leichteren oder schwereren Gang (1–24, Standard 12); so lässt sich eine hohe Kadenz auch am Anstieg beibehalten. Lastanstiege werden auf 20 W pro Sekunde geglättet. Fahrergewicht plus 10 kg für ein virtuelles Fahrrad bestimmen den Gewichtsanteil. Abfahrten werden durch die Mindestleistung des Daum begrenzt. Fahrergewicht (30–250 kg) und Leistungsgrenze (20–1000 W, Standard 300 W) lassen sich auch bei ausgeschalteter Steuerung speichern. Das Dashboard zeigt Modus, Gang, Steigung, Modellgeschwindigkeit, bestätigte Sollleistung und Steuerfehler. Web-Gänge benötigen keine Kopplung unter „Controls“ in Zwift; natives Zwift-Schalten ist hier nicht implementiert.
 
-Die Schalterzustände, das Fahrergewicht, die Leistungsgrenze, der virtuelle Gang und eine stabile virtuelle Gerätekennung liegen in `data/zwift-settings.json`. Beim Ausschalten der Bridge werden die Netzwerkverbindungen geschlossen und die Geräteankündigung zurückgezogen. TCP-Port **36866** und UDP-Port **5353** dienen der Bridge. Die mitgelieferte Compose-Datei ist für einen Linux-Docker-Server mit `network_mode: host` eingerichtet. Auf Docker Desktop braucht die LAN-/Multicast-Erreichbarkeit einen gesonderten Test; die direkt unter Windows gestartete Anwendung bietet dieselbe Bridge an.
+Die Schalterzustände, das Fahrergewicht, die Leistungsgrenze, der virtuelle Gang und eine stabile virtuelle Gerätekennung liegen in `data/zwift-settings.json`. Beim Ausschalten der Bridge werden die Netzwerkverbindungen geschlossen und die Geräteankündigung zurückgezogen. TCP-Port **36866** und UDP-Port **5353** dienen der Bridge. Beide Compose-Varianten sind für einen Linux-Docker-Server mit `network_mode: host` eingerichtet. Auf Docker Desktop braucht die LAN-/Multicast-Erreichbarkeit einen gesonderten Test; die direkt unter Windows gestartete Anwendung bietet dieselbe Bridge an.
 
 Wenn du Zwift selbst für den Strava-Upload nutzt, kannst du mit `STRAVA_ENABLED=false` in `.env` den automatischen Upload dieses Loggers ausschalten. Lokale Trainingsdateien werden weiterhin gespeichert. Die Umsetzung und ihre Grenzen sind in [docs/zwift-bridge.md](docs/zwift-bridge.md) beschrieben. Kopplung und Widerstandssteuerung müssen mit der jeweiligen Kombination aus Cockpit, Firmware und Zwift-Gerät geprüft werden.
 
@@ -107,7 +130,7 @@ Die Ergometer-IP lässt sich im Webinterface beim Gerätestatus über **IP speic
 
 `ErgoStravaLogger/config.json` ist eine Vorlage ohne Geheimnisse. Lokal bevorzugt die Anwendung `config.local.json`. Private Konfiguration, `.env` und der Datenordner sind von Git und dem Docker-Build ausgeschlossen.
 
-Docker Compose nutzt standardmäßig die Vorlage und die Zugangsdaten aus dem Web-Pairing in `data/`. Mit `CONFIG_FILE=./ErgoStravaLogger/config.local.json` in `.env` wählst du eine private Konfigurationsdatei. Kopiere beim Umzug auch diese Datei und `data/` auf den Server. Wenn noch keine Tokens vorhanden sind, richte die App im Webinterface ein und erteile die Strava-Freigabe im Browser.
+Docker Compose nutzt ohne `CONFIG_FILE` die jeweilige Vorlage und die Zugangsdaten aus dem Web-Pairing in `data/`. Das Docker-Startpaket verwendet `CONFIG_FILE=./config.local.json` für eine private Kopie; beim Quellcode-Checkout lautet der entsprechende Pfad `CONFIG_FILE=./ErgoStravaLogger/config.local.json`. Kopiere beim Umzug auch diese Datei und `data/` auf den Server. Wenn noch keine Tokens vorhanden sind, richte die App im Webinterface ein und erteile die Strava-Freigabe im Browser.
 
 | Einstellung | Standard | Bedeutung |
 | --- | --- | --- |

@@ -1,10 +1,13 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+ARG TARGETARCH
 WORKDIR /src
 COPY NuGet.Config ./
 COPY ErgoStravaLogger/ErgoStravaLogger.csproj ErgoStravaLogger/
-RUN dotnet restore ErgoStravaLogger/ErgoStravaLogger.csproj
+RUN case "$TARGETARCH" in amd64) rid=linux-x64;; arm64) rid=linux-arm64;; *) echo "Unsupported architecture: $TARGETARCH" >&2; exit 1;; esac \
+    && dotnet restore ErgoStravaLogger/ErgoStravaLogger.csproj --runtime "$rid"
 COPY ErgoStravaLogger/ ErgoStravaLogger/
-RUN dotnet publish ErgoStravaLogger/ErgoStravaLogger.csproj -c Release --no-restore -o /app/publish
+RUN case "$TARGETARCH" in amd64) rid=linux-x64;; arm64) rid=linux-arm64;; *) echo "Unsupported architecture: $TARGETARCH" >&2; exit 1;; esac \
+    && dotnet publish ErgoStravaLogger/ErgoStravaLogger.csproj -c Release --runtime "$rid" --self-contained false --no-restore -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app

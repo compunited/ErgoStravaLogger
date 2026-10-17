@@ -1,0 +1,29 @@
+services:
+  ergo-strava:
+    image: ghcr.io/compunited/ergostravalogger:${ERGO_IMAGE_TAG:-v1.0.0}
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    # Linux host networking permits LAN discovery and the trainer bridge.
+    network_mode: host
+    environment:
+      ERGO_IP: "${ERGO_IP:-192.168.0.50}"
+      OUTPUT_DIRECTORY: /data
+      LISTEN_URL: "http://0.0.0.0:${WEB_PORT:-8080}"
+      STRAVA_ENABLED: "${STRAVA_ENABLED:-true}"
+      PUBLIC_BASE_URL: "${PUBLIC_BASE_URL:-}"
+    volumes:
+      - type: bind
+        source: ${CONFIG_FILE:-./config.json}
+        target: /config/config.json
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./data
+        target: /data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

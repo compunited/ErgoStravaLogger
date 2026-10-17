@@ -98,9 +98,104 @@ jobs:
           path: release/*
           if-no-files-found: error
 
+  container:
+    name: Publish Linux Docker image
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Validate image version
+        id: version
+        shell: bash
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          TAG="${INPUT_TAG:-${GITHUB_REF_NAME}}"
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]] || (( ${#TAG} > 128 )); then
+            echo "Invalid image version" >&2
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "RELEASE_TAG=$TAG" >> "$GITHUB_ENV"
+          {
+            echo 'tags<<EOF'
+            echo "ghcr.io/compunited/ergostravalogger:$TAG"
+            if [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo 'ghcr.io/compunited/ergostravalogger:latest'
+            fi
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ steps.version.outputs.tag }}
+          persist-credentials: false
+      - name: Resolve image revision
+        id: source
+        run: echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+        with:
+          platforms: arm64
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - name: Build and test each Linux image without network or persistent data
+        shell: bash
+        run: |
+          set -euo pipefail
+          for ARCH in amd64 arm64; do
+            docker buildx build --platform "linux/$ARCH" --load --tag "ergostrava:smoke-$ARCH" .
+            docker run --rm --platform "linux/$ARCH" --network none --read-only \
+              --tmpfs /tmp --tmpfs /data --env STRAVA_ENABLED=false \
+              --entrypoint /bin/sh "ergostrava:smoke-$ARCH" -ec \
+              'test -s /app/config.json; test -s /app/wwwroot/index.html; dotnet /app/ErgoStravaLogger.dll simulate --config /app/config.json; test "$(find /data/simulation -name "*.tcx" | wc -l)" -eq 1'
+          done
+      - name: Log in to GitHub Container Registry
+        shell: bash
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ github.token }}
+        run: printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GHCR_USER" --password-stdin
+      - name: Publish tested platforms
+        id: image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.version.outputs.tags }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/compunited/ErgoStravaLogger
+            org.opencontainers.image.licenses=MIT
+            org.opencontainers.image.version=${{ steps.version.outputs.tag }}
+            org.opencontainers.image.revision=${{ steps.source.outputs.revision }}
+      - name: Package standalone Docker quickstart
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir docker-bundle release
+          cp deploy/compose.image.yaml docker-bundle/compose.yaml
+          cp deploy/.env.image.example docker-bundle/.env.example
+          cp ErgoStravaLogger/config.json docker-bundle/config.json
+          cp docs/docker-image.md docker-bundle/README.md
+          cp LICENSE SECURITY.md THIRD-PARTY-NOTICES.md docker-bundle/
+          sed -i "s/v1.0.0/${RELEASE_TAG}/g" docker-bundle/README.md
+          sed -i "s/^ERGO_IMAGE_TAG=.*/ERGO_IMAGE_TAG=${RELEASE_TAG}/" docker-bundle/.env.example
+          sed -i "s/ERGO_IMAGE_TAG:-v1.0.0/ERGO_IMAGE_TAG:-${RELEASE_TAG}/" docker-bundle/compose.yaml
+          ( cd docker-bundle && zip -qr "../release/ErgoStravaLogger-${RELEASE_TAG}-docker.zip" . )
+          ( cd release && sha256sum *.zip > SHA256SUMS-docker.txt )
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: package-docker
+          path: release/*
+          if-no-files-found: error
+      - name: Log out of GitHub Container Registry
+        if: always()
+        run: docker logout ghcr.io
+
   release:
     name: Create downloadable release
-    needs: package
+    needs: [package, container]
     runs-on: ubuntu-latest
     permissions:
       contents: write

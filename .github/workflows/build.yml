@@ -41,3 +41,5 @@ jobs:
           persist-credentials: false
       - run: docker build --tag ergo-strava:ci .
       - run: docker run --rm --network none ergo-strava:ci --help
+      - name: Validate the standalone image configuration
+        run: docker compose --project-directory . --env-file deploy/.env.image.example -f deploy/compose.image.yaml config --quiet

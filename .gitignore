@@ -367,6 +367,7 @@ config.local.json
 .env
 .env.*
 !.env.example
+!deploy/.env.image.example
 data/
 .tools/
 .tmp/

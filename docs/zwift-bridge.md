@@ -49,11 +49,16 @@ Das Ausschalten der Bridge beendet Discovery und TCP-Verbindungen. Aufzeichnung 
 
 ## Docker auf dem Linux-Server oder Raspberry Pi
 
-Die mitgelieferte `compose.yaml` verwendet `network_mode: host`. Damit kann die Discovery am lokalen Multicast-Verkehr teilnehmen und die tatsächlich erreichbare IP-Adresse des Servers veröffentlichen. Server, Bike und Tablet müssen im selben Subnetz liegen. LAN für den Server und WLAN für das Tablet sind dafür geeignet, sofern der Router die Teilnehmer miteinander kommunizieren lässt.
+Sowohl das [Docker-Startpaket mit fertigem Image](docker-image.md) als auch die `compose.yaml` für den Quellcode-Build verwenden `network_mode: host`. Damit kann die Discovery am lokalen Multicast-Verkehr teilnehmen und die tatsächlich erreichbare IP-Adresse des Servers veröffentlichen. Server, Bike und Tablet müssen im selben Subnetz liegen. LAN für den Server und WLAN für das Tablet sind dafür geeignet, sofern der Router die Teilnehmer miteinander kommunizieren lässt.
+
+Nach dem Vorbereiten der lokalen Konfiguration im entpackten Docker-Startpaket:
 
 ```sh
-docker compose up -d --build
+docker compose pull
+docker compose up -d
 ```
+
+Für einen eigenen Build aus dem Repository bleibt `docker compose up -d --build` im Quellcode-Hauptordner verfügbar.
 
 Das Webinterface ist standardmäßig unter `http://SERVER-IP:8080` erreichbar. Für die Bridge müssen im lokalen Netz diese Verbindungen möglich sein:
 
