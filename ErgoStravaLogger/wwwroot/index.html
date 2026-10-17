@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Ergo · Strava Logger</title>
+  <style>
+    :root{--bg:#f6f5f2;--paper:#fff;--ink:#292b2d;--muted:#6b6e72;--line:#e5e3df;--orange:#ef5b23;--soft-orange:#fff1e9;--green:#36735b;--soft-green:#eaf4ee;--red:#a93832;--soft-red:#fff0ed;--radius:17px}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px;line-height:1.5}button,input{font:inherit}button,a,input,summary{outline-offset:4px}a{color:var(--ink);text-underline-offset:3px}button{cursor:pointer}button:disabled{cursor:wait;opacity:.5}button.primary:disabled{cursor:default}button,input{border-radius:9px}button{border:1px solid var(--line);padding:10px 14px;background:var(--paper);color:var(--ink);font-weight:600;transition:background .15s}button:hover:not(:disabled){background:#f1f0ec}button.primary{background:var(--orange);color:#fff;border-color:var(--orange)}button.primary:hover:not(:disabled){background:#d84d18}button.small{font-size:12px;padding:7px 11px}.page{max-width:1250px;margin:auto;padding:0 36px 36px}header{display:flex;align-items:center;justify-content:space-between;padding:28px 0;border-bottom:1px solid var(--line);gap:15px}.brand{font-size:21px;letter-spacing:-.8px;font-weight:750;display:flex;align-items:center;gap:11px}.brand-mark{width:27px;height:27px;display:grid;place-items:center;background:var(--orange);border-radius:8px;color:white;font-size:21px;line-height:1}.brand span{color:var(--muted);font-weight:450;letter-spacing:-.5px}.tag{display:inline-flex;align-items:center;gap:7px;border-radius:99px;background:#eeece7;padding:5px 11px;font-size:12px;font-weight:600;white-space:nowrap}.dot{display:inline-block;width:7px;height:7px;background:#8a8b88;border-radius:50%;flex:none}.tag.good{color:var(--green);background:var(--soft-green)}.tag.good .dot{background:var(--green)}.tag.recording{background:var(--soft-orange);color:#aa3f15}.tag.recording .dot{background:var(--orange);box-shadow:0 0 0 3px #ef5b2318}.tag.error{background:var(--soft-red);color:var(--red)}.tag.error .dot{background:var(--red)}.intro{display:flex;justify-content:space-between;align-items:end;padding:28px 0 22px;gap:20px}.eyebrow{font-size:11px;font-weight:700;letter-spacing:1.25px;text-transform:uppercase;color:var(--muted);margin:0 0 5px}h1{font-size:31px;font-weight:650;line-height:1.2;letter-spacing:-1.3px;margin:0}h2{font-size:17px;font-weight:650;letter-spacing:-.4px;margin:0}h3{font-size:14px;margin:0 0 10px}p{margin:8px 0}.muted{color:var(--muted)}.intro p{margin:9px 0 0;color:var(--muted)}.layout{display:grid;grid-template-columns:minmax(0,1fr) 335px;gap:20px;align-items:start}.stack{display:grid;gap:20px}.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}.pad{padding:23px}.card-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.live-head{padding:21px 23px 0}.timestamp{color:var(--muted);font-size:11px}.metrics{display:grid;grid-template-columns:1fr 1fr 1fr;padding:24px 0 21px;margin:0 23px;border-bottom:1px solid var(--line)}.metric{padding:0 19px;border-left:1px solid var(--line)}.metric:first-child{padding-left:0;border:0}.metric-label{color:var(--muted);font-size:12px;display:flex;align-items:center;gap:6px}.metric-value{font-size:49px;line-height:1.35;font-weight:550;letter-spacing:-2.2px;font-variant-numeric:tabular-nums}.metric.power .metric-value{color:var(--orange)}.unit{font-size:13px;font-weight:450;letter-spacing:0;color:var(--muted);margin-left:4px}.ride-details{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:17px 23px}.ride-details strong{display:block;font-size:23px;font-weight:550;letter-spacing:-.6px;font-variant-numeric:tabular-nums}.ride-details .metric-label{margin-bottom:2px}.chart{padding:0 23px 22px}.chart-top{display:flex;justify-content:space-between;align-items:center;margin:8px 0 7px;font-size:11px;color:var(--muted)}.chart-inner{height:105px;position:relative;border-bottom:1px solid var(--line);background:repeating-linear-gradient(to bottom,transparent 0,transparent 33px,#eeece760 34px,#eeece760 35px)}.chart-inner svg{width:100%;height:100%;display:block;overflow:visible}.chart-empty{position:absolute;inset:0;display:grid;place-items:center;font-size:12px;color:var(--muted)}.chart-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:6px}.info-row{display:flex;align-items:start;justify-content:space-between;gap:18px}.device-name{font-size:14px;font-weight:650;margin-bottom:3px}.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;overflow-wrap:anywhere}.device-detail{font-size:12px;color:var(--muted);margin-top:9px}.notice{padding:11px 13px;border-radius:9px;background:#f5f4f0;color:var(--muted);font-size:12px;margin-top:16px}.notice.error{background:var(--soft-red);color:var(--red)}.notice.success{background:var(--soft-green);color:var(--green)}.strava-title{font-size:21px;font-weight:750;letter-spacing:-.8px;color:var(--orange)}.strava-description{font-size:12px;color:var(--muted);line-height:1.65;margin:14px 0 18px}.full{width:100%}.setup{margin-top:19px;border-top:1px solid var(--line);padding-top:16px}.setup summary{cursor:pointer;font-size:12px;font-weight:600}.steps{padding-left:19px;font-size:12px;color:var(--muted);margin:13px 0 17px}.steps li{padding-left:3px;margin-bottom:10px}.steps a{color:var(--orange)}.callback{padding:9px 10px;border:1px solid var(--line);background:var(--bg);border-radius:7px;margin-top:7px;color:var(--ink)}label{font-size:12px;font-weight:600;display:block;margin-bottom:6px}input{width:100%;border:1px solid #d7d5d0;padding:10px 11px;background:#fff;color:var(--ink)}input:focus{outline:2px solid #ef5b2340;border-color:var(--orange)}.field{margin:0 0 13px}.form-note{font-size:11px;color:var(--muted);margin:10px 0}.recordings-head{padding:20px 23px;display:flex;align-items:center;justify-content:space-between;gap:12px}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:12px;text-align:left}th{padding:9px 23px;background:#fbfaf8;border-bottom:1px solid var(--line);color:var(--muted);font-size:10px;letter-spacing:.7px;text-transform:uppercase;font-weight:650}td{padding:14px 23px;border-bottom:1px solid var(--line);vertical-align:middle}tbody tr:last-child td{border-bottom:0}.file-name{font-weight:600;font-size:12px;display:block;max-width:330px;overflow-wrap:anywhere}.file-detail{font-size:11px;color:var(--muted);margin-top:3px}.file-error{font-size:11px;color:var(--red);margin-top:4px;max-width:240px;overflow-wrap:anywhere}.download{font-size:11px;font-weight:600;color:var(--orange);white-space:nowrap;text-decoration:none}.upload-state{font-size:11px;color:var(--muted)}.upload-state.good{color:var(--green)}.empty{padding:29px 23px 33px;text-align:center;color:var(--muted);font-size:12px}.how{font-size:12px;color:var(--muted)}.how p{margin:10px 0 0;line-height:1.65}.footer{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);padding:22px 1px 0;gap:15px}.toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);max-width:min(580px,calc(100% - 30px));padding:13px 19px;box-shadow:0 4px 30px #0002;border:1px solid var(--line);border-radius:11px;background:#fff;font-size:13px;z-index:10}.toast.error{color:var(--red);border-color:#efc4bd}.hidden,[hidden]{display:none!important}
+    .device-settings{margin-top:18px}.device-controls{display:flex;gap:10px;align-items:center}.device-controls input{max-width:280px;min-width:0}.device-controls button{white-space:nowrap}
+    .bridge-switch{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:19px 0 12px;font-size:14px;cursor:pointer}.bridge-switch input{appearance:none;flex:none;width:43px;height:25px;padding:3px;border:0;border-radius:99px;background:#d7d5d0;cursor:pointer;transition:background .15s}.bridge-switch input:before{content:'';display:block;width:19px;height:19px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0002;transition:transform .15s}.bridge-switch input:checked{background:var(--green)}.bridge-switch input:checked:before{transform:translateX(18px)}.bridge-switch input:disabled{cursor:wait;opacity:.55}.bridge-details{font-size:12px;color:var(--muted)}
+    .control-settings{margin-top:20px;border-top:1px solid var(--line);padding-top:17px}.control-fields{display:flex;flex-wrap:wrap;align-items:end;gap:13px;margin-top:16px}.control-fields .field{flex:1 1 140px;margin:0}.control-fields button{flex:none}.control-status{margin-top:14px}.control-settings .bridge-switch{margin-top:16px}
+    .gear-selector{margin-top:20px}.gear-controls{display:flex;align-items:center;gap:14px;margin-top:9px}.gear-controls button{width:62px;height:52px;font-size:26px;line-height:1;padding:0}.gear-value{min-width:88px;text-align:center;font-size:24px;font-weight:650;font-variant-numeric:tabular-nums}.gear-value small{font-size:13px;font-weight:450;color:var(--muted)}.simulation-details{font-size:12px;color:var(--muted);margin-top:9px}.simulation-details.limited{color:var(--orange)}
+    @media(max-width:980px){.page{padding:0 24px 28px}.layout{grid-template-columns:minmax(0,1fr) 300px}.metric-value{font-size:39px}.metric{padding:0 12px}.unit{font-size:11px}.pad{padding:20px}}@media(max-width:780px){.layout{grid-template-columns:1fr}.sidebar{grid-template-columns:1fr 1fr;align-items:start}.intro{padding-top:23px}.metric-value{font-size:47px}h1{font-size:29px}}@media(max-width:530px){.page{padding:0 16px 23px}header{padding:21px 0}.brand{font-size:18px}.brand-mark{width:24px;height:24px}header>.tag{font-size:10px;padding:5px 8px}.intro{align-items:start;flex-direction:column;gap:15px;padding-bottom:19px}.intro p{font-size:12px}.sidebar{grid-template-columns:1fr}.pad{padding:20px}.metrics{margin:0 20px;padding-top:22px}.metric{padding:0 11px}.metric-value{font-size:36px}.metric-label{font-size:11px}.unit{font-size:10px;display:block;margin:0;line-height:1.2}.metric-value .unit{margin-top:2px}.ride-details .unit{display:inline;margin-left:3px;font-size:12px}.live-head,.ride-details{padding-left:20px;padding-right:20px}.live-head{align-items:start}.timestamp{max-width:130px;text-align:right}.recordings-head{padding:20px}td,th{padding-left:20px;padding-right:15px}.footer{flex-direction:column;gap:5px}.file-name{max-width:190px}.info-row{gap:10px}.chart{padding-left:20px;padding-right:20px}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="brand"><div class="brand-mark" aria-hidden="true">↗</div>Ergo <span>/ Strava Logger</span></div>
+      <span class="tag" id="connectionTag"><span class="dot"></span><span id="connectionLabel">Status wird geladen</span></span>
+    </header>
+    <div class="intro">
+      <div><p class="eyebrow">Daum ergo bike premium 8i</p><h1>Dein Training. Aufgezeichnet.</h1><p>Trainiere am Cockpit. Der Logger übernimmt die Daten und den Weg zu Strava.</p></div>
+      <span class="tag" id="recordingTag"><span class="dot"></span><span id="recordingLabel">Aufzeichnung wird geprüft</span></span>
+    </div>
+    <div class="layout">
+      <main class="stack">
+        <section class="card" aria-labelledby="liveTitle">
+          <div class="card-head live-head"><h2 id="liveTitle">Live-Daten</h2><span id="sampleTime" class="timestamp">Noch keine Messwerte</span></div>
+          <div class="metrics">
+            <div class="metric power"><div class="metric-label">Leistung</div><div class="metric-value"><span id="power">—</span><span class="unit">Watt</span></div></div>
+            <div class="metric"><div class="metric-label">Kadenz</div><div class="metric-value"><span id="cadence">—</span><span class="unit">U/min</span></div></div>
+            <div class="metric"><div class="metric-label">Herzfrequenz</div><div class="metric-value"><span id="heartRate">—</span><span class="unit">bpm</span></div></div>
+          </div>
+          <div class="ride-details">
+            <div><span class="metric-label">Geschwindigkeit</span><strong><span id="speed">—</span><span class="unit">km/h</span></strong></div>
+            <div><span class="metric-label">Distanz am Ergometer</span><strong><span id="distance">—</span><span class="unit">km</span></strong></div>
+          </div>
+          <div class="chart"><div class="chart-top"><span>Leistungsverlauf</span><span id="chartMax">Letzte 2 Minuten</span></div><div class="chart-inner"><svg id="powerChart" viewBox="0 0 600 100" preserveAspectRatio="none" role="img" aria-label="Leistungsverlauf der letzten zwei Minuten"><path id="chartArea" fill="#ef5b2310"></path><path id="chartLine" fill="none" stroke="#ef5b23" stroke-width="2" vector-effect="non-scaling-stroke"></path></svg><div class="chart-empty" id="chartEmpty">Der Verlauf erscheint mit den ersten Messwerten.</div></div><div class="chart-labels"><span>−2 min</span><span>Jetzt</span></div></div>
+        </section>
+        <section class="card pad" aria-labelledby="deviceTitle">
+          <div class="info-row"><div><h2 id="deviceTitle">Ergometer</h2><div class="mono muted" id="deviceAddress" style="margin-top:7px">Verbindung wird geprüft</div><div class="device-detail" id="deviceDetails">—</div></div><button class="small" id="diagnoseButton" type="button">Verbindung prüfen</button></div>
+          <form id="deviceForm" class="device-settings"><label for="deviceIp">Ergometer-IP (IPv4)</label><div class="device-controls"><input id="deviceIp" name="ip" type="text" inputmode="decimal" required maxlength="15" autocomplete="off" spellcheck="false" placeholder="z. B. 192.168.0.50" aria-describedby="deviceIpHint"><button id="deviceSaveButton" type="submit">IP speichern</button></div><p id="deviceIpHint" class="form-note">Nach dem Speichern wird eine neue Verbindung zum Ergometer aufgebaut.</p></form>
+          <div class="notice" id="deviceNotice">Warte auf den Status des Loggers.</div>
+        </section>
+        <section class="card pad" aria-labelledby="zwiftTitle">
+          <div class="card-head"><h2 id="zwiftTitle">Zwift-Bridge</h2><span class="tag" id="zwiftTag"><span class="dot"></span><span>Status wird geladen</span></span></div>
+          <label class="bridge-switch" for="zwiftEnabled"><span>Zwift-Bridge aktivieren</span><input id="zwiftEnabled" type="checkbox" role="switch" aria-describedby="zwiftHelp" disabled></label>
+          <div class="bridge-details">Sensoren: Watt · Kadenz · Puls</div>
+          <p class="form-note" id="zwiftHelp">Verbinde Zwift auf deinem Tablet mit der Bridge im selben Heimnetz.</p>
+          <div class="notice" id="zwiftNotice" hidden></div>
+          <form id="zwiftControlForm" class="control-settings">
+            <div class="card-head"><h3 style="margin:0">Widerstand</h3><span class="tag" id="zwiftControlTag"><span class="dot"></span><span>Status wird geladen</span></span></div>
+            <label class="bridge-switch" for="zwiftControlEnabled"><span>Zwift steuert Widerstand</span><input id="zwiftControlEnabled" type="checkbox" role="switch" aria-describedby="zwiftControlHelp" disabled></label>
+            <p class="form-note" id="zwiftControlHelp">Nach dem Einschalten die Bridge in Zwift auch unter „Widerstand“ koppeln. ERG übernimmt die Zielleistung; Streckenfahrten berechnen die Last aus Steigung, Kadenz und virtuellem Gang. Bei ausgeschaltetem Schalter stellst du die Belastung am Cockpit ein.</p>
+            <div class="control-fields"><div class="field"><label for="riderWeightKg">Fahrergewicht (kg)</label><input id="riderWeightKg" type="number" min="30" max="250" step="0.1" required value="75" inputmode="decimal" disabled></div><div class="field"><label for="maxPowerWatts">Leistungsgrenze (W)</label><input id="maxPowerWatts" type="number" min="20" max="1000" step="1" required value="300" inputmode="numeric" disabled></div><button id="zwiftControlSaveButton" type="submit" disabled>Werte speichern</button></div>
+            <div class="gear-selector"><label id="virtualGearLabel">Virtueller Gang</label><div class="gear-controls" role="group" aria-labelledby="virtualGearLabel" aria-describedby="virtualGearHelp"><button id="gearDownButton" type="button" aria-label="Leichterer Gang" disabled>−</button><span class="gear-value" id="virtualGearValue" aria-live="polite">—</span><button id="gearUpButton" type="button" aria-label="Schwererer Gang" disabled>+</button></div><p class="form-note" id="virtualGearHelp">Kleinerer Gang = leichter. Die Gangwahl wirkt nur bei Streckenfahrten; ERG bleibt unverändert. Sie wird sofort gespeichert.</p><p class="form-note" id="cockpitGearStatus">Cockpit meldet keine aktive Schaltung; Web-Gänge bleiben verfügbar.</p><div id="cockpitActivation" hidden><p class="form-note" id="cockpitActivationHelp">Zum Aktivieren kurz anhalten.</p><button id="cockpitActivateButton" type="button" aria-describedby="cockpitActivationHelp" disabled>Cockpit-Schaltung aktivieren</button></div><div class="notice" id="zwiftGearNotice" hidden></div><div class="notice" id="cockpitShiftNotice" hidden></div></div>
+            <div class="bridge-details control-status" id="zwiftControlStatus">Noch keine Vorgabe von Zwift.</div>
+            <div class="simulation-details" id="zwiftSimulationStatus" hidden></div>
+            <div class="notice" id="zwiftControlNotice" hidden></div>
+          </form>
+        </section>
+        <section class="card" aria-labelledby="recordingsTitle">
+          <div class="recordings-head"><h2 id="recordingsTitle">Aufzeichnungen <span id="recordingsCount" class="muted" style="font-size:12px;font-weight:450"></span></h2><button class="small" type="button" id="retryButton">Uploads erneut versuchen</button></div>
+          <div class="table-wrap" id="recordingsTable" hidden><table><thead><tr><th>Training</th><th>Strava</th><th>Datei</th></tr></thead><tbody id="recordingsBody"></tbody></table></div>
+          <div class="empty" id="recordingsEmpty">Abgeschlossene Trainings erscheinen hier als TCX-Datei.</div>
+        </section>
+      </main>
+      <aside class="stack sidebar">
+        <section class="card pad" aria-labelledby="stravaTitle">
+          <div class="card-head"><h2 id="stravaTitle" class="strava-title">STRAVA</h2><span class="tag" id="stravaTag">Wird geprüft</span></div>
+          <p id="stravaDescription" class="strava-description">Warte auf den Verbindungsstatus.</p>
+          <button class="primary full" id="connectButton" type="button" disabled>Mit Strava verbinden</button>
+          <div id="stravaNotice" class="notice" hidden></div>
+          <details class="setup" id="stravaSetup"><summary id="setupSummary">Strava-App einrichten</summary>
+            <ol class="steps"><li>Erstelle eine App in deinen <a href="https://www.strava.com/settings/api" target="_blank" rel="noopener noreferrer">Strava-API-Einstellungen</a>.</li><li>Trage dort als <strong>Authorization Callback Domain</strong> diesen Host ein, ohne Port:<div class="callback mono" id="callbackDomain">—</div></li><li>Speichere die Client ID und das Client Secret hier. Anschließend verbindest du dein Konto und erlaubst den Upload deiner Aktivitäten.</li></ol>
+            <form id="stravaForm"><div class="field"><label for="clientId">Client ID</label><input id="clientId" name="clientId" inputmode="numeric" pattern="[0-9]+" required autocomplete="off" placeholder="z. B. 123456"></div><div class="field"><label for="clientSecret">Client Secret</label><input id="clientSecret" name="clientSecret" type="password" required autocomplete="new-password" placeholder="Secret deiner Strava-App"></div><button class="full" type="submit" id="saveButton">App-Zugang speichern</button><p class="form-note">Die Zugangsdaten werden auf dem Logger gespeichert. Die Freigabe bei Strava umfasst das Schreiben deiner Aktivitäten.</p></form>
+            <p class="form-note">Weiterleitungsadresse:<br><span class="mono" id="callbackUrl">—</span></p>
+          </details>
+        </section>
+        <section class="card pad how" aria-labelledby="howTitle"><h2 id="howTitle">Einfach trainieren</h2><p>Wähle dein Training wie gewohnt am Daum-Cockpit. Sobald du trittst, beginnt der Logger mit der Aufzeichnung.</p><p id="recordingHelp">Nach 15 Sekunden ohne Treten pausiert die Aufzeichnung. Beim Weiterfahren bleibt es dasselbe Training. Setzt du den Distanzzähler am Cockpit zurück, wird es abgeschlossen; beim nächsten Treten beginnt ein neues Training.</p><p>Mit verbundenem Strava-Konto werden abgeschlossene Trainings automatisch hochgeladen.</p></section>
+      </aside>
+    </div>
+    <footer class="footer"><span>Daum Premium 8i · Aufzeichnung über dein lokales Netzwerk</span><span id="pollStatus">Status wird geladen …</span></footer>
+  </div>
+  <div class="toast" id="toast" role="status" hidden></div>
+  <script>
+    'use strict';
+    const el = id => document.getElementById(id);
+    const numberFormat = new Intl.NumberFormat('de-DE',{maximumFractionDigits:0});
+    const decimalFormat = new Intl.NumberFormat('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1});
+    const dateFormat = new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    const timeFormat = new Intl.DateTimeFormat('de-DE',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    let latestStatus = null, polling = false, toastTimer, history = [], lastSampleTimestamp = null, renderedRecordings = null, setupInitialized = false;
+    let deviceIpDirty = false, deviceSettingsSaving = false, renderedDeviceHost = null, statusRevision = 0;
+    let zwiftSettingsSaving = false, zwiftStatusKnown = false, zwiftConfirmedEnabled = false;
+    let zwiftControlSaving = false, zwiftControlKnown = false, zwiftControlConfirmedEnabled = false;
+    let zwiftGearSaving = false, zwiftGearKnown = false, zwiftConfirmedGear = 12;
+    let cockpitActivationAvailable = false;
+    const zwiftControlDirty = new Set();
+    function validNumber(value){return typeof value === 'number' && Number.isFinite(value);}
+    function numeric(value,decimals=false){return validNumber(value)?(decimals?decimalFormat:numberFormat).format(value):'—';}
+    function parsedDate(value){const date = new Date(value);return value && Number.isFinite(date.getTime())?date:null;}
+    function showToast(message,error=false){el('toast').textContent=message;el('toast').className=error?'toast error':'toast';el('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el('toast').hidden=true;},error?10000:5500);}
+    function setTag(id,label,state=''){el(id).className='tag'+(state?' '+state:'');el(id).replaceChildren();const dot=document.createElement('span');dot.className='dot';const text=document.createElement('span');text.textContent=label;el(id).append(dot,text);}
+    function setNotice(id,message,state=''){el(id).textContent=message||'';el(id).hidden=!message;el(id).className='notice'+(state?' '+state:'');}
+    function resetLiveData(){
+      history=[];lastSampleTimestamp=null;
+      for(const id of ['power','cadence','heartRate','speed','distance'])el(id).textContent='—';
+      el('sampleTime').textContent='Noch keine Messwerte';drawChart(null);
+    }
+    function drawChart(sample){
+      const now=Date.now();
+      if(sample && sample.timestamp!==lastSampleTimestamp && validNumber(sample.powerWatts)){
+        const date=parsedDate(sample.timestamp);
+        if(date){history.push({time:date.getTime(),power:Math.max(0,sample.powerWatts)});lastSampleTimestamp=sample.timestamp;}
+      }
+      history=history.filter(point=>point.time>=now-120000 && point.time<=now+5000);
+      const hasData=history.length>1;el('chartEmpty').hidden=hasData;
+      if(!hasData){el('chartLine').setAttribute('d','');el('chartArea').setAttribute('d','');el('chartMax').textContent='Letzte 2 Minuten';return;}
+      const max=Math.max(100,...history.map(point=>point.power))*1.12;
+      const points=history.map(point=>({x:Math.max(0,Math.min(600,(point.time-now+120000)/120000*600)),y:95-point.power/max*87}));
+      const line=points.map((p,i)=>(i?'L':'M')+p.x.toFixed(2)+','+p.y.toFixed(2)).join(' ');
+      el('chartLine').setAttribute('d',line);el('chartArea').setAttribute('d',line+' L'+points.at(-1).x.toFixed(2)+',100 L'+points[0].x.toFixed(2)+',100 Z');
+      el('chartMax').textContent='Max. '+numeric(Math.max(...history.map(point=>point.power)))+' W · 2 min';
+    }
+    function renderRecordings(recordings){
+      const data=Array.isArray(recordings)?recordings:[];
+      const signature=JSON.stringify(data);if(signature===renderedRecordings)return;renderedRecordings=signature;
+      el('recordingsCount').textContent=data.length?'('+data.length+')':'';el('recordingsTable').hidden=!data.length;el('recordingsEmpty').hidden=!!data.length;el('recordingsBody').replaceChildren();
+      for(const file of data){
+        const row=document.createElement('tr'),fileCell=document.createElement('td'),statusCell=document.createElement('td'),downloadCell=document.createElement('td');
+        const name=document.createElement('span');name.className='file-name';name.textContent=file.name||'Training';
+        const detail=document.createElement('div');detail.className='file-detail';const date=parsedDate(file.createdAt);detail.textContent=(date?dateFormat.format(date):'')+(validNumber(file.bytes)?(date?' · ':'')+numeric(file.bytes/1024)+' KB':'');
+        fileCell.append(name,detail);
+        if(file.error){const error=document.createElement('div');error.className='file-error';error.textContent=file.error;fileCell.append(error);}
+        const uploaded=file.uploaded || !!file.activityId;
+        const activityId=String(file.activityId??'');
+        if(uploaded && /^[0-9]+$/.test(activityId)) {const link=document.createElement('a');link.className='upload-state good';link.textContent='Auf Strava ↗';link.href='https://www.strava.com/activities/'+activityId;link.target='_blank';link.rel='noopener noreferrer';statusCell.append(link);}
+        else{const state=document.createElement('span');state.className='upload-state'+(uploaded?' good':'');state.textContent=uploaded?'Hochgeladen':file.error?'Upload fehlgeschlagen':'Lokal gespeichert';statusCell.append(state);}
+        const download=document.createElement('a');download.className='download';download.textContent='TCX ↓';download.href='/api/recordings/'+encodeURIComponent(file.name||'');download.setAttribute('download','');downloadCell.append(download);
+        row.append(fileCell,statusCell,downloadCell);el('recordingsBody').append(row);
+      }
+    }
+    function renderZwift(zwift){
+      if(zwiftMutating())return;
+      const known=typeof zwift?.enabled==='boolean';zwiftStatusKnown=known;
+      el('zwiftEnabled').disabled=!known;
+      renderZwiftControl(zwift);
+      renderZwiftGear(zwift);
+      if(!known){setTag('zwiftTag','Status unbekannt');setNotice('zwiftNotice','Der Status der Zwift-Bridge konnte noch nicht geladen werden.');return;}
+      zwiftConfirmedEnabled=zwift.enabled;el('zwiftEnabled').checked=zwift.enabled;
+      const failed=!!zwift.lastError;
+      setTag('zwiftTag',failed?'Fehler':!zwift.enabled?'Aus':!zwift.active?'Startet':zwift.clients>0?'Zwift verbunden':'Wartet auf Zwift',failed?'error':zwift.active&&zwift.clients>0?'good':'');
+      setNotice('zwiftNotice',failed?zwift.lastError:zwift.enabled&&zwift.active?('Wähle „'+(zwift.deviceName||'Daum 8i Bridge')+'“ in Zwift als Leistungssensor.'+(!zwift.dataAvailable?' Noch keine aktuellen Messwerte vom Ergometer.':'')):null,failed?'error':'');
+    }
+    function setZwiftControlDisabled(disabled){for(const id of ['zwiftControlEnabled','riderWeightKg','maxPowerWatts','zwiftControlSaveButton'])el(id).disabled=disabled;}
+    function zwiftMutating(){return zwiftSettingsSaving||zwiftControlSaving||zwiftGearSaving;}
+    function setZwiftGearDisabled(disabled){el('gearDownButton').disabled=disabled||!zwiftGearKnown||zwiftConfirmedGear<=1;el('gearUpButton').disabled=disabled||!zwiftGearKnown||zwiftConfirmedGear>=24;el('cockpitActivateButton').disabled=disabled||!cockpitActivationAvailable||zwiftMutating();}
+    function renderZwiftGear(zwift){
+      zwiftGearKnown=Number.isInteger(zwift?.virtualGear)&&zwift.virtualGear>=1&&zwift.virtualGear<=24;
+      if(zwiftGearKnown)zwiftConfirmedGear=zwift.virtualGear;
+      el('virtualGearValue').replaceChildren();
+      if(zwiftGearKnown){const value=document.createElement('span');value.textContent=zwiftConfirmedGear;const range=document.createElement('small');range.textContent=' / 24';el('virtualGearValue').append(value,range);}
+      else el('virtualGearValue').textContent='—';
+      cockpitActivationAvailable=zwiftControlKnown&&zwift?.controlEnabled===true&&zwift.controllable===true&&zwift.cockpitGear===null;
+      el('cockpitActivation').hidden=!cockpitActivationAvailable;
+      setZwiftGearDisabled(!zwiftGearKnown);
+      el('cockpitGearStatus').textContent=Number.isInteger(zwift?.cockpitGear)&&zwift.cockpitGear>=1&&zwift.cockpitGear<=28?'Cockpit-Gang '+zwift.cockpitGear+' · Gangtasten schalten die Bridge im Streckenmodus.':'Cockpit meldet keine aktive Schaltung; Web-Gänge bleiben verfügbar.';
+      setNotice('cockpitShiftNotice',zwift?.cockpitShiftError,'error');
+    }
+    function renderZwiftControl(zwift){
+      const known=typeof zwift?.controlEnabled==='boolean' && validNumber(zwift.riderWeightKg) && validNumber(zwift.maxPowerWatts);
+      zwiftControlKnown=known;setZwiftControlDisabled(!known);
+      if(!known){setTag('zwiftControlTag','Status unbekannt');setNotice('zwiftControlNotice','Der Status der Widerstandssteuerung konnte noch nicht geladen werden.');el('zwiftSimulationStatus').hidden=true;return;}
+      zwiftControlConfirmedEnabled=zwift.controlEnabled;el('zwiftControlEnabled').checked=zwift.controlEnabled;
+      for(const id of ['riderWeightKg','maxPowerWatts'])if(!zwiftControlDirty.has(id)&&document.activeElement!==el(id))el(id).value=zwift[id];
+      const failed=!!zwift.controlError, mode=zwift.controlMode;
+      const label=failed?'Fehler':!zwift.controlEnabled?'Cockpit':!zwift.enabled?'Bridge aus':!zwift.controllable?'Nicht verfügbar':mode==='erg'?'ERG':mode==='simulation'?'Strecke':'Bereit';
+      setTag('zwiftControlTag',label,failed?'error':zwift.controlEnabled&&zwift.controllable&&(mode==='erg'||mode==='simulation')?'good':'');
+      const target=zwift.controlEnabled&&validNumber(zwift.targetPowerWatts)?numeric(zwift.targetPowerWatts)+' W':null;
+      el('zwiftControlStatus').textContent=!zwift.controlEnabled?'Manuelle Belastung am Daum-Cockpit.':target?(mode==='erg'?'ERG':mode==='simulation'?'Strecke':'Zwift')+' · Sollleistung: '+target:'Noch keine Vorgabe von Zwift.';
+      const simulation=zwift.controlEnabled&&mode==='simulation',details=[];
+      if(validNumber(zwift.simulationGradePercent))details.push('Steigung: '+numeric(zwift.simulationGradePercent,true)+' %');
+      if(validNumber(zwift.simulationSpeedKmh))details.push('Simulierte Geschwindigkeit: '+numeric(zwift.simulationSpeedKmh,true)+' km/h');
+      if(zwift.simulationLimited)details.push('An Leistungsgrenze'+(validNumber(zwift.simulationDesiredPowerWatts)?' · berechnet '+numeric(zwift.simulationDesiredPowerWatts)+' W':''));
+      el('zwiftSimulationStatus').textContent=details.join(' · ');el('zwiftSimulationStatus').hidden=!simulation||!details.length;el('zwiftSimulationStatus').className='simulation-details'+(zwift.simulationLimited?' limited':'');
+      setNotice('zwiftControlNotice',failed?zwift.controlError:zwift.controlEnabled&&!zwift.enabled?'Aktiviere die Zwift-Bridge, damit Zwift den Widerstand steuern kann.':null,failed?'error':'');
+    }
+    function render(status){
+      latestStatus=status;const device=status.device||{},recording=status.recording||{},strava=status.strava||{},sample=status.sample;
+      if(!sample || (renderedDeviceHost!==null && renderedDeviceHost!==device.host))resetLiveData();
+      renderedDeviceHost=device.host??'';
+      if(!deviceIpDirty && !deviceSettingsSaving && document.activeElement!==el('deviceIp'))el('deviceIp').value=device.host||'';
+      setTag('connectionTag',device.connected?'Ergometer verbunden':'Ergometer nicht verbunden',device.connected?'good':device.error?'error':'');
+      setTag('recordingTag',recording.active?'Training wird aufgezeichnet':recording.paused?'Training pausiert':recording.enabled?'Bereit für dein Training':'Aufzeichnung deaktiviert',recording.active?'recording':'');
+      el('deviceAddress').textContent=device.host?device.host+':'+(device.port??51955):'Geräteadresse noch nicht konfiguriert';
+      const lastSeen=parsedDate(device.lastSeen);el('deviceDetails').textContent=[device.softwareVersion?'Software: '+device.softwareVersion:null,lastSeen?'Zuletzt gesehen: '+timeFormat.format(lastSeen):null].filter(Boolean).join(' · ')||'Noch keine Gerätedaten';
+      setNotice('deviceNotice',device.error||(!device.host?'Trage oben die IP-Adresse deines Ergometer-Cockpits ein.':device.connected?'Die Verbindung steht. Die Daten werden regelmäßig vom Cockpit gelesen.':'Prüfe Netzwerk, Geräte-IP und die Fernsteuerungseinstellungen am Cockpit.'),device.error?'error':'');
+      renderZwift(status.zwift);
+      el('power').textContent=numeric(sample?.powerWatts);el('cadence').textContent=numeric(sample?.cadenceRpm);el('heartRate').textContent=numeric(sample?.heartRateBpm);
+      el('speed').textContent=numeric(validNumber(sample?.speedMetersPerSecond)?sample.speedMetersPerSecond*3.6:null,true);el('distance').textContent=numeric(validNumber(sample?.distanceMeters)?sample.distanceMeters/1000:null,true);
+      const sampleDate=parsedDate(sample?.timestamp);el('sampleTime').textContent=sampleDate?(device.connected?'Aktualisiert ':'Letzter Messwert ')+timeFormat.format(sampleDate):'Noch keine Messwerte';drawChart(sample);
+      setTag('stravaTag',strava.authorized?'Verbunden':strava.configured?'Konto verbinden':'Einrichtung',strava.authorized?'good':'');
+      el('stravaDescription').textContent=strava.authorized?(strava.enabled?'Deine abgeschlossenen Trainings werden automatisch an Strava übertragen.':'Dein Konto ist verbunden. Der automatische Upload ist in der Konfiguration deaktiviert.'):strava.configured?'Die App ist eingerichtet. Verbinde jetzt dein Strava-Konto für den automatischen Upload.':'Richte einmal deine Strava-App ein und verbinde dein Konto. Danach werden deine Trainings automatisch übertragen.';
+      el('connectButton').disabled=!strava.configured;el('connectButton').textContent=strava.authorized?'Strava erneut verbinden':'Mit Strava verbinden';
+      if(strava.lastError)setNotice('stravaNotice',strava.lastError,'error');
+      else if(strava.lastUpload){const uploadDate=parsedDate(typeof strava.lastUpload==='string'?strava.lastUpload:strava.lastUpload.timestamp??strava.lastUpload.uploadedAt);setNotice('stravaNotice',uploadDate?'Letzter Upload: '+dateFormat.format(uploadDate):'Der letzte Upload wurde verarbeitet.','success');}
+      else setNotice('stravaNotice',null);
+      el('setupSummary').textContent=strava.configured?'App-Zugang ändern':'Strava-App einrichten';
+      if(!setupInitialized){el('stravaSetup').open=!strava.configured;setupInitialized=true;}
+      el('callbackUrl').textContent=strava.callbackUrl||'Noch nicht konfiguriert';
+      try{el('callbackDomain').textContent=strava.callbackUrl?new URL(strava.callbackUrl).hostname:'—';}catch{el('callbackDomain').textContent='Weiterleitungsadresse prüfen';}
+      if(validNumber(recording.pauseSeconds)&&validNumber(recording.idleSeconds)){
+        const pauseTime=numeric(recording.pauseSeconds)+' Sekunden';
+        const extraLimit=recording.idleSeconds>0?' Zusätzlich wird das Training nach '+(recording.idleSeconds%60===0?numeric(recording.idleSeconds/60)+' Minuten':numeric(recording.idleSeconds)+' Sekunden')+' ohne Treten abgeschlossen.':'';
+        el('recordingHelp').textContent='Nach '+pauseTime+' ohne Treten pausiert die Aufzeichnung. Beim Weiterfahren bleibt es dasselbe Training. Setzt du den Distanzzähler am Cockpit zurück, wird es abgeschlossen; beim nächsten Treten beginnt ein neues Training.'+extraLimit;
+      }
+      el('retryButton').disabled=!strava.authorized;
+      renderRecordings(status.recordings);el('pollStatus').textContent='Status aktualisiert '+timeFormat.format(new Date());
+    }
+    async function readResponse(response){
+      const text=await response.text();let body;
+      try{body=text?JSON.parse(text):{};}catch{body={message:text};}
+      if(!response.ok)throw new Error(body.message||body.error||'Anfrage fehlgeschlagen (HTTP '+response.status+').');return body;
+    }
+    async function poll(){
+      if(polling)return;polling=true;const revision=statusRevision;
+      try{const response=await fetch('/api/status',{cache:'no-store',signal:AbortSignal.timeout(8000)});const status=await readResponse(response);if(revision===statusRevision)render(status);}
+      catch(error){if(revision===statusRevision){el('pollStatus').textContent='Logger nicht erreichbar. Nächster Versuch in wenigen Sekunden.';setTag('connectionTag','Logger nicht erreichbar','error');setNotice('deviceNotice','Der Status konnte nicht geladen werden: '+error.message,'error');}}
+      finally{polling=false;}
+    }
+    async function mutate(url,body){const headers={'X-Ergo-Request':'1'};if(latestStatus?.csrfToken)headers['X-CSRF-Token']=latestStatus.csrfToken;if(body!==undefined)headers['Content-Type']='application/json';const response=await fetch(url,{method:'POST',headers,body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(30000)});return readResponse(response);}
+    el('deviceIp').addEventListener('input',()=>{deviceIpDirty=true;});
+    el('zwiftEnabled').addEventListener('change',async()=>{
+      if(zwiftMutating()||!zwiftStatusKnown)return;
+      const input=el('zwiftEnabled'),enabled=input.checked;zwiftSettingsSaving=true;input.disabled=true;setZwiftControlDisabled(true);setZwiftGearDisabled(true);statusRevision++;
+      if(enabled)setTag('zwiftTag','Startet');
+      setNotice('zwiftNotice',enabled?'Die Zwift-Bridge wird aktiviert …':'Die Zwift-Bridge wird deaktiviert …');
+      let settings=null,operationError=null,status=null,statusError=null;
+      try{settings=await mutate('/api/zwift/settings',{enabled});}catch(error){operationError=error;}
+      try{status=await readResponse(await fetch('/api/status',{cache:'no-store',signal:AbortSignal.timeout(8000)}));}catch(error){statusError=error;}
+      statusRevision++;zwiftSettingsSaving=false;
+      if(status){latestStatus={...latestStatus,zwift:status.zwift};renderZwift(status.zwift);}
+      else{
+        if(typeof settings?.enabled==='boolean')zwiftConfirmedEnabled=settings.enabled;
+        input.checked=zwiftConfirmedEnabled;input.disabled=true;zwiftStatusKnown=false;
+        zwiftControlKnown=false;setZwiftControlDisabled(true);setTag('zwiftControlTag','Status unbekannt');
+        zwiftGearKnown=false;setZwiftGearDisabled(true);
+        setTag('zwiftTag','Status unbekannt','error');setNotice('zwiftNotice','Der aktuelle Status konnte nicht geladen werden. Die Anzeige wird erneut geprüft.','error');
+      }
+      if(operationError)showToast(operationError.message,true);
+      else if(statusError)showToast('Einstellung gespeichert. Der aktuelle Status konnte nicht geladen werden: '+statusError.message,true);
+      else showToast(zwiftConfirmedEnabled?'Zwift-Bridge aktiviert.':'Zwift-Bridge deaktiviert.');
+    });
+    for(const id of ['riderWeightKg','maxPowerWatts'])el(id).addEventListener('input',()=>zwiftControlDirty.add(id));
+    async function saveZwiftControl(enabled){
+      if(zwiftMutating()||!zwiftControlKnown)return;
+      if(!el('zwiftControlForm').reportValidity()){el('zwiftControlEnabled').checked=zwiftControlConfirmedEnabled;return;}
+      const riderWeightKg=Number(el('riderWeightKg').value),maxPowerWatts=Number(el('maxPowerWatts').value);
+      zwiftControlSaving=true;setZwiftControlDisabled(true);setZwiftGearDisabled(true);el('zwiftEnabled').disabled=true;statusRevision++;
+      el('zwiftControlSaveButton').textContent='Wird gespeichert …';setNotice('zwiftControlNotice','Die Einstellungen für die Widerstandssteuerung werden gespeichert …');
+      let settings=null,operationError=null,status=null,statusError=null;
+      try{settings=await mutate('/api/zwift/control/settings',{enabled,riderWeightKg,maxPowerWatts});zwiftControlDirty.clear();}catch(error){operationError=error;}
+      try{status=await readResponse(await fetch('/api/status',{cache:'no-store',signal:AbortSignal.timeout(8000)}));}catch(error){statusError=error;}
+      statusRevision++;zwiftControlSaving=false;el('zwiftControlSaveButton').textContent='Werte speichern';
+      if(status){latestStatus={...latestStatus,zwift:status.zwift};renderZwift(status.zwift);}
+      else{
+        if(typeof settings?.controlEnabled==='boolean')zwiftControlConfirmedEnabled=settings.controlEnabled;
+        el('zwiftControlEnabled').checked=zwiftControlConfirmedEnabled;zwiftControlKnown=false;zwiftStatusKnown=false;
+        zwiftGearKnown=false;setZwiftGearDisabled(true);
+        setTag('zwiftControlTag','Status unbekannt','error');setNotice('zwiftControlNotice','Der aktuelle Status konnte nicht geladen werden. Die Anzeige wird erneut geprüft.','error');
+      }
+      if(operationError)showToast(operationError.message,true);
+      else if(statusError)showToast('Einstellung gespeichert. Der aktuelle Status konnte nicht geladen werden: '+statusError.message,true);
+      else showToast(zwiftControlConfirmedEnabled?'Zwift-Steuerung gespeichert. Kopple die Bridge in Zwift unter „Widerstand“.':'Einstellungen gespeichert. Die Belastung wird am Cockpit eingestellt.');
+    }
+    el('zwiftControlEnabled').addEventListener('change',()=>saveZwiftControl(el('zwiftControlEnabled').checked));
+    el('zwiftControlForm').addEventListener('submit',event=>{event.preventDefault();saveZwiftControl(el('zwiftControlEnabled').checked);});
+    async function saveZwiftGear(delta){
+      if(zwiftMutating()||!zwiftGearKnown)return;
+      const gear=Math.max(1,Math.min(24,zwiftConfirmedGear+delta));if(gear===zwiftConfirmedGear)return;
+      zwiftGearSaving=true;setZwiftGearDisabled(true);setZwiftControlDisabled(true);el('zwiftEnabled').disabled=true;statusRevision++;
+      setNotice('zwiftGearNotice','Gang '+gear+' wird gespeichert …');
+      let saved=null,operationError=null,status=null;
+      try{saved=await mutate('/api/zwift/control/gear',{gear});}catch(error){operationError=error;}
+      try{status=await readResponse(await fetch('/api/status',{cache:'no-store',signal:AbortSignal.timeout(8000)}));}catch{}
+      statusRevision++;zwiftGearSaving=false;
+      const actual=status?.zwift??saved;
+      if(actual){latestStatus={...latestStatus,zwift:actual};renderZwift(actual);}
+      else{zwiftStatusKnown=false;zwiftControlKnown=false;zwiftGearKnown=false;setZwiftGearDisabled(true);setTag('zwiftControlTag','Status unbekannt','error');}
+      if(operationError){setNotice('zwiftGearNotice',operationError.message,'error');showToast(operationError.message,true);}
+      else if(!actual)setNotice('zwiftGearNotice','Der aktuelle Gang konnte nicht bestätigt werden. Die Anzeige wird erneut geprüft.','error');
+      else setNotice('zwiftGearNotice',null);
+    }
+    el('gearDownButton').addEventListener('click',()=>saveZwiftGear(-1));
+    el('gearUpButton').addEventListener('click',()=>saveZwiftGear(1));
+    el('cockpitActivateButton').addEventListener('click',async()=>{
+      if(zwiftMutating()||!cockpitActivationAvailable)return;
+      zwiftGearSaving=true;setZwiftGearDisabled(true);setZwiftControlDisabled(true);el('zwiftEnabled').disabled=true;statusRevision++;
+      el('cockpitActivateButton').textContent='Wird aktiviert …';setNotice('zwiftGearNotice','Die Cockpit-Schaltung wird aktiviert. Zum Aktivieren kurz anhalten.');
+      let confirmed=null,operationError=null,status=null;
+      try{confirmed=await mutate('/api/zwift/control/cockpit/activate');}catch(error){operationError=error;}
+      try{status=await readResponse(await fetch('/api/status',{cache:'no-store',signal:AbortSignal.timeout(8000)}));}catch{}
+      statusRevision++;zwiftGearSaving=false;el('cockpitActivateButton').textContent='Cockpit-Schaltung aktivieren';
+      if(status){latestStatus={...latestStatus,zwift:status.zwift};renderZwift(status.zwift);}
+      else{zwiftStatusKnown=false;zwiftControlKnown=false;zwiftGearKnown=false;cockpitActivationAvailable=false;setZwiftGearDisabled(true);setTag('zwiftControlTag','Status unbekannt','error');}
+      const nativeConfirmed=Number.isInteger(confirmed?.nativeGear)&&confirmed.nativeGear>=1&&confirmed.nativeGear<=28;
+      const nativeObserved=Number.isInteger(status?.zwift?.cockpitGear)&&status.zwift.cockpitGear>=1&&status.zwift.cockpitGear<=28;
+      if(operationError){setNotice('zwiftGearNotice',operationError.message,'error');showToast(operationError.message,true);}
+      else if(nativeConfirmed&&nativeObserved){setNotice('zwiftGearNotice',null);showToast('Cockpit-Schaltung aktiv. Die Gangtasten wirken im Streckenmodus.');}
+      else if(nativeConfirmed){setNotice('zwiftGearNotice','Gangbefehl bestätigt. Prüfe die Ganganzeige am Cockpit.');showToast('Gangbefehl bestätigt. Prüfe die Ganganzeige am Cockpit.');}
+      else{setNotice('zwiftGearNotice','Die Aktivierung konnte nicht bestätigt werden. Prüfe die Ganganzeige am Cockpit.','error');showToast('Die Aktivierung konnte nicht bestätigt werden. Prüfe die Ganganzeige am Cockpit.',true);}
+    });
+    el('deviceForm').addEventListener('submit',async event=>{
+      event.preventDefault();if(deviceSettingsSaving)return;
+      const button=el('deviceSaveButton'),input=el('deviceIp');deviceSettingsSaving=true;button.disabled=true;input.disabled=true;button.textContent='Wird gespeichert …';
+      try{
+        const settings=await mutate('/api/device/settings',{ip:input.value.trim()});
+        statusRevision++;input.value=settings.ip;deviceIpDirty=false;renderedDeviceHost=settings.ip;resetLiveData();
+        el('deviceAddress').textContent=settings.ip+':'+(latestStatus?.device?.port??51955);el('deviceDetails').textContent='Noch keine Gerätedaten';
+        setTag('connectionTag','Verbindung wird aufgebaut');setNotice('deviceNotice','Die IP-Adresse ist gespeichert. Eine neue Verbindung wird aufgebaut.');
+        showToast('Ergometer-IP gespeichert. Die Verbindung wird neu aufgebaut.');await poll();
+      }catch(error){showToast(error.message,true);}
+      finally{deviceSettingsSaving=false;button.disabled=false;input.disabled=false;button.textContent='IP speichern';}
+    });
+    el('diagnoseButton').addEventListener('click',async()=>{const button=el('diagnoseButton');button.disabled=true;button.textContent='Wird geprüft …';try{await mutate('/api/diagnose');await poll();showToast('Die Verbindungsprüfung ist abgeschlossen.');}catch(error){showToast(error.message,true);}finally{button.disabled=false;button.textContent='Verbindung prüfen';}});
+    el('retryButton').addEventListener('click',async()=>{const button=el('retryButton');button.disabled=true;try{await mutate('/api/uploads/retry');showToast('Ausstehende Uploads werden erneut versucht.');await poll();}catch(error){showToast(error.message,true);}finally{button.disabled=!latestStatus?.strava?.authorized;}});
+    el('stravaForm').addEventListener('submit',async event=>{event.preventDefault();const button=el('saveButton');button.disabled=true;button.textContent='Wird gespeichert …';try{await mutate('/api/strava/settings',{clientId:el('clientId').value.trim(),clientSecret:el('clientSecret').value.trim()});el('clientSecret').value='';await poll();showToast('App-Zugang gespeichert. Verbinde jetzt dein Strava-Konto.');}catch(error){showToast(error.message,true);}finally{button.disabled=false;button.textContent='App-Zugang speichern';}});
+    el('connectButton').addEventListener('click',()=>{if(latestStatus?.strava?.configured)window.location.assign('/auth/strava/start');});
+    const query=new URLSearchParams(window.location.search);
+    if(query.get('strava')==='connected')showToast('Dein Strava-Konto ist verbunden.');
+    if(query.get('strava')==='error')showToast(query.get('message')||'Die Strava-Verbindung konnte nicht abgeschlossen werden.',true);
+    if(query.has('strava')){const clean=new URL(window.location.href);clean.searchParams.delete('strava');clean.searchParams.delete('message');window.history.replaceState({},'',clean.pathname+clean.search+clean.hash);}
+    poll();setInterval(poll,3000);
+  </script>
+</body>
+</html>

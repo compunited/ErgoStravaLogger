@@ -1,0 +1,38 @@
+{
+  "ErgoIp": "192.168.0.50",
+  "ErgoPort": 51955,
+  "LoggingIntervalMs": 1000,
+  "TimeoutMs": 5000,
+  "ReconnectDelaySeconds": 5,
+  "PauseSeconds": 15,
+  "IdleSeconds": 0,
+  "MinimumTrainingSeconds": 30,
+  "OutputDirectory": "../data",
+  "TraceProtocol": false,
+  "SynchronizeOnConnect": true,
+  "SpeedUnit": "m/s",
+  "RecordingEnabled": true,
+  "ListenUrl": "http://0.0.0.0:8080",
+  "PublicBaseUrl": "",
+  "Strava": {
+    "Enabled": true,
+    "ClientId": "",
+    "ClientSecret": "",
+    "RefreshToken": "",
+    "AccessToken": "",
+    "TokenFile": "strava-tokens.json",
+    "RedirectUri": "http://localhost:8080/auth/strava/callback",
+    "ActivityName": "Daum Premium 8i"
+  },
+  "Zwift": {
+    "Enabled": false,
+    "ControlEnabled": false,
+    "RiderWeightKg": 75,
+    "MaxPowerWatts": 300,
+    "VirtualGear": 12,
+    "Port": 36866,
+    "DeviceName": "Daum 8i Bridge",
+    "BindAddress": "0.0.0.0",
+    "StaleAfterSeconds": 5
+  }
+}

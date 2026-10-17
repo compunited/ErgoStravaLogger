@@ -1,0 +1,20 @@
+using ErgoStravaLogger.Tests;
+
+await ProtocolTests.RunAsync();
+Console.WriteLine("Daum protocol / TCP: passed");
+await StravaAndTcxTests.RunAsync();
+Console.WriteLine("TCX / Strava OAuth / uploads: passed");
+await RecorderTests.RunAsync();
+Console.WriteLine("Recording / recovery: passed");
+await DeviceSettingsTests.RunAsync();
+Console.WriteLine("Device settings / live IP change: passed");
+await DirConTests.RunAsync();
+await TrainerControlTests.RunAsync();
+await CockpitActivationTests.RunAsync();
+Console.WriteLine("Direct Connect / sensor measurements: passed");
+await MdnsTests.RunAsync();
+Console.WriteLine("mDNS / trainer discovery: passed");
+await ZwiftBridgeTests.RunAsync();
+Console.WriteLine("Zwift bridge / switch persistence: passed");
+await WebTests.RunAsync();
+Console.WriteLine("Web / OAuth callback / downloads: passed");

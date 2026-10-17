@@ -1,0 +1,19 @@
+[Unit]
+Description=Daum Premium 8i training logger and Strava web interface
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ergo
+Group=ergo
+WorkingDirectory=/opt/ergo-strava
+ExecStart=/opt/ergo-strava/ErgoStravaLogger web --config /opt/ergo-strava/config.json
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

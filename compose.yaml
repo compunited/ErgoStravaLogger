@@ -1,0 +1,23 @@
+services:
+  ergo-strava:
+    build: .
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    # LAN discovery for Zwift needs multicast on the host's network (Linux).
+    network_mode: host
+    environment:
+      ERGO_IP: "${ERGO_IP:-192.168.0.50}"
+      OUTPUT_DIRECTORY: /data
+      LISTEN_URL: "http://0.0.0.0:${WEB_PORT:-8080}"
+      STRAVA_ENABLED: "${STRAVA_ENABLED:-true}"
+      # Set this for a reverse proxy or if the browser URL differs from the container URL.
+      PUBLIC_BASE_URL: "${PUBLIC_BASE_URL:-}"
+    volumes:
+      - ${CONFIG_FILE:-./ErgoStravaLogger/config.json}:/config/config.json:ro
+      - ./data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

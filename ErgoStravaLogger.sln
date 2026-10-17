@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35617.110
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ErgoStravaLogger", "ErgoStravaLogger\ErgoStravaLogger.csproj", "{47F7FC75-30FA-4F26-B9D6-DD734481496E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ErgoStravaLogger.Tests", "tests\ErgoStravaLogger.Tests.csproj", "{3E8ADB90-D540-4A38-B9B7-1158DC9A781B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{47F7FC75-30FA-4F26-B9D6-DD734481496E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47F7FC75-30FA-4F26-B9D6-DD734481496E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47F7FC75-30FA-4F26-B9D6-DD734481496E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{47F7FC75-30FA-4F26-B9D6-DD734481496E}.Debug|x64.Build.0 = Debug|Any CPU
+		{47F7FC75-30FA-4F26-B9D6-DD734481496E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{47F7FC75-30FA-4F26-B9D6-DD734481496E}.Debug|x86.Build.0 = Debug|Any CPU
+		{47F7FC75-30FA-4F26-B9D6-DD734481496E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47F7FC75-30FA-4F26-B9D6-DD734481496E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47F7FC75-30FA-4F26-B9D6-DD734481496E}.Release|x64.ActiveCfg = Release|Any CPU
+		{47F7FC75-30FA-4F26-B9D6-DD734481496E}.Release|x64.Build.0 = Release|Any CPU
+		{47F7FC75-30FA-4F26-B9D6-DD734481496E}.Release|x86.ActiveCfg = Release|Any CPU
+		{47F7FC75-30FA-4F26-B9D6-DD734481496E}.Release|x86.Build.0 = Release|Any CPU
+		{3E8ADB90-D540-4A38-B9B7-1158DC9A781B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E8ADB90-D540-4A38-B9B7-1158DC9A781B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E8ADB90-D540-4A38-B9B7-1158DC9A781B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3E8ADB90-D540-4A38-B9B7-1158DC9A781B}.Debug|x64.Build.0 = Debug|Any CPU
+		{3E8ADB90-D540-4A38-B9B7-1158DC9A781B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3E8ADB90-D540-4A38-B9B7-1158DC9A781B}.Debug|x86.Build.0 = Debug|Any CPU
+		{3E8ADB90-D540-4A38-B9B7-1158DC9A781B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E8ADB90-D540-4A38-B9B7-1158DC9A781B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E8ADB90-D540-4A38-B9B7-1158DC9A781B}.Release|x64.ActiveCfg = Release|Any CPU
+		{3E8ADB90-D540-4A38-B9B7-1158DC9A781B}.Release|x64.Build.0 = Release|Any CPU
+		{3E8ADB90-D540-4A38-B9B7-1158DC9A781B}.Release|x86.ActiveCfg = Release|Any CPU
+		{3E8ADB90-D540-4A38-B9B7-1158DC9A781B}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {43068F95-149F-41E0-A431-1864DFD2C1A9}
+	EndGlobalSection
+EndGlobal
