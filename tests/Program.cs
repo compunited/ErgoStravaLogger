@@ -11,6 +11,7 @@ Console.WriteLine("Device settings / live IP change: passed");
 await DirConTests.RunAsync();
 await TrainerControlTests.RunAsync();
 await CockpitActivationTests.RunAsync();
+await AutomaticCockpitTests.RunAsync();
 Console.WriteLine("Direct Connect / sensor measurements: passed");
 await MdnsTests.RunAsync();
 Console.WriteLine("mDNS / trainer discovery: passed");

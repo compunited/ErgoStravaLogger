@@ -6,15 +6,19 @@ public sealed class LoggerRuntime
 {
     private readonly LoggerConfig config;
     private readonly StravaClient strava;
+    private readonly TimeProvider automaticCockpitClock;
     public ZwiftBridgeManager ZwiftBridge { get; }
     public TrainerControl TrainerControl { get; }
 
-    public LoggerRuntime(LoggerConfig config, StravaClient strava)
+    public LoggerRuntime(LoggerConfig config, StravaClient strava,
+        Func<ZwiftBridgeOptions, IReadOnlyList<Guid>, int, IBridgeDiscovery>? discoveryFactory = null,
+        TimeProvider? automaticCockpitClock = null)
     {
         this.config = config;
         this.strava = strava;
+        this.automaticCockpitClock = automaticCockpitClock ?? TimeProvider.System;
         TrainerControl = new TrainerControl(config, GetBridgeTelemetry, ReadPowerLimitsAsync, WritePowerAsync);
-        ZwiftBridge = new ZwiftBridgeManager(config, GetBridgeTelemetry, trainerControl: TrainerControl);
+        ZwiftBridge = new ZwiftBridgeManager(config, GetBridgeTelemetry, discoveryFactory, TrainerControl);
     }
 
     private readonly object stateLock = new();
@@ -31,13 +35,16 @@ public sealed class LoggerRuntime
     private bool recordingPaused;
     private bool recordingSessionOpen;
     private string? deviceError;
+    private string? automaticCockpitError;
+    private DateTimeOffset nextAutomaticCockpitAttempt;
     private string? softwareVersion;
     private string? uploadError;
     private DateTimeOffset? lastUpload;
 
     public object DeviceStatus()
     {
-        lock (stateLock) return new { host = config.ErgoIp, port = config.ErgoPort, connected, lastSeen, softwareVersion, error = deviceError, speedUnit = config.SpeedUnit };
+        lock (stateLock) return new { host = config.ErgoIp, port = config.ErgoPort, connected, lastSeen, softwareVersion,
+            error = deviceError ?? automaticCockpitError, speedUnit = config.SpeedUnit };
     }
     public object RecordingStatus()
     {
@@ -128,6 +135,7 @@ public sealed class LoggerRuntime
                 var bridgeData = GetBridgeTelemetry();
                 await ZwiftBridge.ObserveCockpitGearAsync(bridgeData.Connected ? bridgeData.Sample?.NativeGear : null, ct);
                 await TrainerControl.TickAsync(ct);
+                await TryActivateCockpitShiftingAutomaticallyAsync(ct);
                 var delay = retry ? TimeSpan.FromSeconds(config.ReconnectDelaySeconds) : TimeSpan.FromMilliseconds(config.LoggingIntervalMs);
                 await deviceWake.WaitAsync(delay, ct);
             }
@@ -181,6 +189,8 @@ public sealed class LoggerRuntime
                 lastSeen = null;
                 softwareVersion = null;
                 deviceError = null;
+                automaticCockpitError = null;
+                nextAutomaticCockpitAttempt = default;
                 recording = false;
                 recordingPaused = false;
                 recordingSessionOpen = false;
@@ -222,13 +232,48 @@ public sealed class LoggerRuntime
         finally { deviceGate.Release(); }
     }
 
-    public async Task<int> ActivateCockpitShiftingAsync(CancellationToken ct = default)
+    private async Task TryActivateCockpitShiftingAutomaticallyAsync(CancellationToken ct)
     {
-        if (!config.Zwift.ControlEnabled)
-            throw new InvalidOperationException("Aktiviere zuerst die Zwift-Widerstandssteuerung.");
+        var data = GetBridgeTelemetry();
+        if (!config.Zwift.Enabled || !config.Zwift.ControlEnabled || data.Sample?.NativeGear is not null)
+        {
+            lock (stateLock) { automaticCockpitError = null; nextAutomaticCockpitAttempt = default; }
+            return;
+        }
+        if (!TrainerControl.Available || data.Sample?.CadenceRpm != 0 || TrainerControl.Mode == "erg")
+            return;
+        var now = automaticCockpitClock.GetUtcNow();
+        lock (stateLock)
+        {
+            if (now < nextAutomaticCockpitAttempt) return;
+            nextAutomaticCockpitAttempt = now.AddSeconds(30);
+        }
+        try
+        {
+            // If the bike was off during process startup, FTMS discovery may not have started yet.
+            if (!ZwiftBridge.GetStatus().Active) await ZwiftBridge.SetEnabledAsync(true, ct);
+            await ActivateCockpitShiftingCoreAsync(automatic: true, ct);
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
+        catch (InvalidOperationException) { } // Pedalling, ERG or a settings change can supersede the eligibility snapshot.
+        catch (Exception ex) when (ex is IOException or InvalidDataException or SocketException or TimeoutException or UnauthorizedAccessException or ArgumentException)
+        {
+            var message = "Automatische Cockpit-Schaltung fehlgeschlagen; neuer Versuch frühestens in 30 Sekunden: " + ex.Message;
+            lock (stateLock) automaticCockpitError = message;
+            Console.Error.WriteLine(message);
+        }
+    }
+
+    public Task<int> ActivateCockpitShiftingAsync(CancellationToken ct = default) =>
+        ActivateCockpitShiftingCoreAsync(automatic: false, ct);
+
+    private async Task<int> ActivateCockpitShiftingCoreAsync(bool automatic, CancellationToken ct)
+    {
         await deviceGate.WaitAsync(ct);
         try
         {
+            if (!config.Zwift.ControlEnabled || (automatic && !config.Zwift.Enabled))
+                throw new InvalidOperationException("Aktiviere zuerst die Zwift-Widerstandssteuerung und die Bridge.");
             var data = GetBridgeTelemetry();
             if (!TrainerControl.Available || activeDevice is null || data.Sample is null)
                 throw new IOException("Keine aktuellen Gerätedaten; Cockpit-Schaltung nicht aktiviert.");
@@ -236,7 +281,11 @@ public sealed class LoggerRuntime
                 throw new InvalidOperationException("Zum Aktivieren der Cockpit-Schaltung kurz anhalten.");
             if (TrainerControl.Mode == "erg")
                 throw new InvalidOperationException("Cockpit-Schaltung vor der Fahrt oder im Streckenmodus aktivieren; ERG zuerst beenden.");
-            if (data.Sample.NativeGear is { } existing) return existing;
+            if (data.Sample.NativeGear is { } existing)
+            {
+                lock (stateLock) automaticCockpitError = null;
+                return existing;
+            }
 
             var wanted = config.Zwift.VirtualGear;
             int applied;
@@ -258,6 +307,7 @@ public sealed class LoggerRuntime
             }
             if (applied != wanted)
                 throw new IOException($"Das Cockpit bestätigte Gang {applied} statt {wanted}.");
+            lock (stateLock) automaticCockpitError = null;
             return applied;
         }
         catch (Exception ex) when (ex is IOException or InvalidDataException or SocketException or TimeoutException)

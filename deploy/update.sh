@@ -6,6 +6,15 @@ umask 077
 deployment_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd -P)
 container_name=ergo-strava
 image_name=ergo-strava:local
+pull_image=false
+if [ "$#" -gt 0 ]; then
+    if [ "$#" -ne 2 ] || [ "$1" != --image ] || [ -z "$2" ]; then
+        printf 'Usage: sh deploy/update.sh [--image REGISTRY/IMAGE:TAG]\n' >&2
+        exit 2
+    fi
+    image_name=$2
+    pull_image=true
+fi
 cd "$deployment_root"
 
 if [ ! -f .env ]; then
@@ -41,8 +50,19 @@ if docker container inspect "$container_name" >/dev/null 2>&1; then
     fi
 fi
 
-# An unsuccessful build leaves the running container alone.
-docker build -t "$image_name" .
+# A failed pull or build leaves the running container alone.
+if [ "$pull_image" = true ]; then
+    docker pull "$image_name"
+else
+    # The classic builder needs these explicitly; BuildKit also accepts them for this native build.
+    build_arch=$(docker info --format '{{.Architecture}}')
+    case "$build_arch" in
+        x86_64|amd64) build_arch=amd64 ;;
+        aarch64|arm64) build_arch=arm64 ;;
+        *) printf 'Unsupported Docker architecture: %s\n' "$build_arch" >&2; exit 1 ;;
+    esac
+    docker build --build-arg "BUILDPLATFORM=linux/$build_arch" --build-arg "TARGETARCH=$build_arch" -t "$image_name" .
+fi
 if docker container inspect "$container_name" >/dev/null 2>&1; then
     docker stop "$container_name"
     docker rename "$container_name" "$previous_name"

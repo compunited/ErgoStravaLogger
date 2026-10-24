@@ -31,6 +31,35 @@ docker compose logs -f
 
 Das Startpaket verwendet standardmäßig das feste Image-Tag `v1.0.0`. So führt ein erneutes Starten nicht automatisch zu einem Wechsel auf eine andere Version. Die [Releases-Seite](https://github.com/compunited/ErgoStravaLogger/releases) nennt die verfügbaren Versionen. Für ein Update sicherst du die lokale Konfiguration und `data/`, änderst `ERGO_IMAGE_TAG` in `.env` auf das gewünschte veröffentlichte Tag und führst erneut `docker compose pull` sowie `docker compose up -d` aus. Das zusätzliche Tag `latest` folgt stabilen Releases; ein konkretes Versionstag macht Updates nachvollziehbarer.
 
+## Aktuelle Hauptbranche als fertiges Image
+
+Das Tag **`main`** enthält den aktuellen getesteten Stand der Hauptbranche. GitHub veröffentlicht es automatisch nach erfolgreichen Tests unter Windows und Linux sowie Offline-Tests der Docker-Images für **Linux amd64 und ARM64**. Es benötigt keinen Release-Tag und lässt sich ohne Anmeldung herunterladen:
+
+```sh
+docker pull ghcr.io/compunited/ergostravalogger:main
+```
+
+Der Download allein ersetzt einen laufenden Container noch nicht. Für die Compose-Installation setzt du in der vorhandenen `.env`:
+
+```dotenv
+ERGO_IMAGE_TAG=main
+```
+
+Danach aktualisieren `docker compose pull` und `docker compose up -d` den Dienst. Wiederhole diese beiden Befehle für spätere Hauptbranch-Updates. Die lokalen Einstellungen und Trainings bleiben in den eingebundenen Host-Dateien erhalten. Das zusätzliche Tag `sha-<vollständiger Commit-SHA>` bezeichnet den zugehörigen veröffentlichten Commit; `latest` folgt weiterhin stabilen Releases.
+
+## Bestehenden Docker-CLI-Host aktualisieren
+
+Wenn der Dienst bereits mit `deploy/update.sh` eingerichtet wurde, kann derselbe Helfer ein fertiges Image verwenden. Auf dem bisherigen Host mit dem Projektordner `~/ergo-strava`:
+
+```sh
+cd ~/ergo-strava
+curl -fsSL https://raw.githubusercontent.com/compunited/ErgoStravaLogger/main/deploy/update.sh -o deploy/update.sh
+sh deploy/update.sh --image ghcr.io/compunited/ergostravalogger:main
+docker logs -f ergo-strava
+```
+
+Das funktioniert ohne Compose-Plugin und ohne lokalen Quellcode-Build. Der Helfer lädt das gewählte Image zuerst und ersetzt danach den von ihm verwalteten Container. `.env`, die dort unter `CONFIG_FILE` gewählte Konfiguration und `data/` werden weiterhin vom Host eingebunden. Kann Docker den Ersatzcontainer nicht starten, stellt der Helfer den bisherigen Container wieder her. Bei weiteren Updates genügt derselbe `sh deploy/update.sh --image ...`-Befehl. Bleibe bei der bisherigen Verwaltung mit dem Helfer; einen durch Compose verwalteten Container ersetzt du mit Compose.
+
 ## Cockpit und Strava einrichten
 
 Am Premium 8i müssen **Fernsteuerung EIN**, **Bedienung sperren AUS**, **Fernsteuerung durch Automatisch** und Kommunikationsprotokoll **Standard** eingestellt sein. Der Server benötigt Zugriff auf TCP-Port **51955** des Bike. Die verwendete Trainingsdatenabfrage `X70` setzt passende Firmware voraus; die Protokollreferenzen nennen dafür Version 1.380 oder neuer.

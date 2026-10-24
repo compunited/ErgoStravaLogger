@@ -59,6 +59,18 @@ docker compose logs -f
 
 Das Webinterface öffnet sich unter `http://<server-ip>:8080`. Konfiguration, Tokens und Trainings bleiben auf dem Host erhalten. Die [ausführliche Docker-Anleitung](docs/docker-image.md) erklärt Cockpiteinstellungen, Strava, Updates, Backups und das Host-Netzwerk für die optionale Zwift-Bridge. Diese Installation verwendet die Compose-Datei aus dem Docker-Startpaket; die folgende Variante baut das Image aus einem Quellcode-Checkout.
 
+Das zusätzliche Image-Tag **`main`** folgt der aktuellen getesteten Hauptbranche. GitHub veröffentlicht es nach erfolgreichen Tests unter Windows und Linux und Offline-Tests der beiden Docker-Architekturen. Dafür ist kein neues Release nötig. Mit `docker pull ghcr.io/compunited/ergostravalogger:main` lädst du es herunter; bei der Compose-Installation setzt du in `.env` **`ERGO_IMAGE_TAG=main`** und führst `docker compose pull` sowie `docker compose up -d` aus. Jedes veröffentlichte Hauptbranch-Image erhält zusätzlich das Tag `sha-<vollständiger Commit-SHA>`. `latest` folgt weiterhin stabilen Releases.
+
+Für einen bereits mit `deploy/update.sh` eingerichteten Host ist auch ohne Compose-Plugin und Quellcode-Build ein Update mit dem fertigen Image möglich. Auf dem bisherigen Docker-Host:
+
+```sh
+cd ~/ergo-strava
+curl -fsSL https://raw.githubusercontent.com/compunited/ErgoStravaLogger/main/deploy/update.sh -o deploy/update.sh
+sh deploy/update.sh --image ghcr.io/compunited/ergostravalogger:main
+```
+
+Der Helfer lädt das Image, bevor er den Container ersetzt, und verwendet weiter `.env`, die bestehende Konfiguration und `data/` auf dem Host.
+
 ## Docker aus dem Quellcode bauen
 
 1. Das [Repository](https://github.com/compunited/ErgoStravaLogger) auf den Server klonen oder als Quellcodearchiv herunterladen.
@@ -108,7 +120,7 @@ Im Dashboard lässt sich **Zwift-Bridge aktivieren** einschalten. Die Anwendung 
 
 Die Bridge überträgt **Watt, Kadenz und Puls**. Ohne aktuelle Gerätedaten überträgt sie keine alten Leistungswerte, beim Stillstand 0 Watt. Der Dashboardstatus zeigt einen aktiven Dienst, verbundene Netzwerkclients und Fehler; eine Anzeige „Wartet auf Zwift“ bestätigt noch keine erfolgreiche Kopplung mit deinem Tablet.
 
-Wenn das Daum-Cockpit eine aktive Gangschaltung meldet, übernimmt die Bridge im Streckenmodus auch Änderungen über dessen Drehknopf beziehungsweise Gangtasten. Die Diagnose zeigt den nativen Cockpit-Gang; der virtuelle Gang ändert sich um dieselbe Anzahl. Der erste Gerätewert nach Start oder Verbindungsunterbrechung verändert die gespeicherte Übersetzung nicht. Wenn keine native Schaltung gemeldet wird, halte kurz an und verwende **Cockpit-Schaltung aktivieren**. Der Button setzt den nativen Gang und bestätigt anschließend die Mindestlast. Die Web-Gänge bleiben ebenfalls verfügbar. ERG bleibt von beiden Schaltwegen unabhängig.
+Wenn Zwift-Bridge und Widerstandssteuerung eingeschaltet sind, aktiviert der Logger die **Cockpit-Gangschaltung automatisch**, sobald aktuelle Gerätedaten und Leistungsgrenzen vorliegen, das Bike stillsteht und kein ERG-Modus läuft. Das gilt auch nach Neustart oder erneuter Verbindung und wenn die Schaltung am Cockpit wieder ausgeschaltet wurde. Eine bereits aktive Schaltung bleibt erhalten. Nach einem Fehler wird frühestens nach 30 Sekunden erneut versucht; **Jetzt erneut versuchen** im Dashboard bleibt als manuelle Wiederholung verfügbar. Sobald das Daum-Cockpit einen Gang meldet, übernimmt die Bridge im Streckenmodus Änderungen über dessen Drehknopf beziehungsweise Gangtasten. Die Diagnose zeigt den nativen Cockpit-Gang; der virtuelle Gang ändert sich um dieselbe Anzahl. Der erste Gerätewert nach Start oder Verbindungsunterbrechung verändert die gespeicherte Übersetzung nicht. Die Web-Gänge bleiben ebenfalls verfügbar. ERG bleibt von beiden Schaltwegen unabhängig.
 
 Für automatische Belastung **Zwift steuert Widerstand** separat einschalten und die Bridge in Zwift zusätzlich unter **Widerstand** koppeln. Die Steuerung ist standardmäßig aus. **ERG** sendet die von Zwift gewünschte Wattzahl an das Cockpit; die Gangwahl verändert sie nicht. Für **Streckenfahrten** berechnet die Bridge eine Wattvorgabe aus Zwift-Steigung, Roll- und Windwiderstand sowie Kadenz und virtuellem Gang. Die vom Daum berechnete Geschwindigkeit wird dafür nicht verwendet. Mit **− / +** im Dashboard wählst du einen leichteren oder schwereren Gang (1–24, Standard 12); so lässt sich eine hohe Kadenz auch am Anstieg beibehalten. Lastanstiege werden auf 20 W pro Sekunde geglättet. Fahrergewicht plus 10 kg für ein virtuelles Fahrrad bestimmen den Gewichtsanteil. Abfahrten werden durch die Mindestleistung des Daum begrenzt. Fahrergewicht (30–250 kg) und Leistungsgrenze (20–1000 W, Standard 300 W) lassen sich auch bei ausgeschalteter Steuerung speichern. Das Dashboard zeigt Modus, Gang, Steigung, Modellgeschwindigkeit, bestätigte Sollleistung und Steuerfehler. Web-Gänge benötigen keine Kopplung unter „Controls“ in Zwift; natives Zwift-Schalten ist hier nicht implementiert.
 
