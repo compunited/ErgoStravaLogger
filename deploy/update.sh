@@ -67,7 +67,7 @@ if docker container inspect "$container_name" >/dev/null 2>&1; then
     docker stop "$container_name"
     docker rename "$container_name" "$previous_name"
 fi
-if docker run -d --name "$container_name" --restart unless-stopped --init --network host --stop-timeout 30 \
+if docker run -d --name "$container_name" --restart always --init --network host --stop-timeout 30 \
     --label "com.greener.ergo-strava.project=$deployment_root" \
     --env-file "$deployment_root/.env" \
     -e OUTPUT_DIRECTORY=/data -e "LISTEN_URL=http://0.0.0.0:$web_port" \

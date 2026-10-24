@@ -1,7 +1,7 @@
 services:
   ergo-strava:
     image: ghcr.io/compunited/ergostravalogger:${ERGO_IMAGE_TAG:-v1.0.0}
-    restart: unless-stopped
+    restart: always
     init: true
     stop_grace_period: 30s
     # Linux host networking permits LAN discovery and the trainer bridge.

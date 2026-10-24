@@ -71,6 +71,8 @@ sh deploy/update.sh --image ghcr.io/compunited/ergostravalogger:main
 
 Der Helfer lädt das Image, bevor er den Container ersetzt, und verwendet weiter `.env`, die bestehende Konfiguration und `data/` auf dem Host.
 
+Beide Compose-Vorlagen und der Update-Helfer verwenden **`restart: always`**: Docker startet den Container nach einem Host- oder Docker-Neustart automatisch, auch wenn er zuvor manuell gestoppt wurde. Ein manueller Stopp bleibt bis zum nächsten Docker-Neustart wirksam. Für bestehende Container lässt sich das ohne Image-Update mit `docker update --restart always ergo-strava` setzen; `docker start ergo-strava` startet einen aktuell gestoppten Container. Docker selbst muss beim Systemstart laufen. Die [Autostart-Anleitung](docs/docker-image.md#automatisch-nach-einem-neustart-starten) enthält die Befehle für den bestehenden Host.
+
 ## Docker aus dem Quellcode bauen
 
 1. Das [Repository](https://github.com/compunited/ErgoStravaLogger) auf den Server klonen oder als Quellcodearchiv herunterladen.

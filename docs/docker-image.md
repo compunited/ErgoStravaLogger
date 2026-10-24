@@ -31,6 +31,27 @@ docker compose logs -f
 
 Das Startpaket verwendet standardmäßig das feste Image-Tag `v1.0.0`. So führt ein erneutes Starten nicht automatisch zu einem Wechsel auf eine andere Version. Die [Releases-Seite](https://github.com/compunited/ErgoStravaLogger/releases) nennt die verfügbaren Versionen. Für ein Update sicherst du die lokale Konfiguration und `data/`, änderst `ERGO_IMAGE_TAG` in `.env` auf das gewünschte veröffentlichte Tag und führst erneut `docker compose pull` sowie `docker compose up -d` aus. Das zusätzliche Tag `latest` folgt stabilen Releases; ein konkretes Versionstag macht Updates nachvollziehbarer.
 
+## Automatisch nach einem Neustart starten
+
+Die aktuellen Compose-Vorlagen und `deploy/update.sh` verwenden `restart: always`. Damit startet Docker den Container nach einem Docker- oder Host-Neustart automatisch. Auch ein zuvor manuell gestoppter Container startet beim nächsten Docker-Neustart wieder; bis dahin bleibt der manuelle Stopp wirksam. `docker compose down` entfernt den Container und beendet damit auch dessen Autostart.
+
+Bei einem bereits mit dem Update-Helfer angelegten Container genügt auf dem bisherigen Server:
+
+```sh
+docker update --restart always ergo-strava
+docker start ergo-strava
+```
+
+Das ändert nur die Starteinstellung des vorhandenen Containers; Einstellungen, Strava-Tokens und Trainings bleiben erhalten. Ein Image-Pull allein ändert die Restart-Policy nicht. Für eine bestehende Compose-Installation, etwa aus dem v1.0.0-Startpaket, ändere `restart` in der lokalen Compose-Datei auf `always` und führe `docker compose up -d` aus, damit spätere Updates die Einstellung beibehalten.
+
+Docker selbst muss beim Systemstart laufen. Auf dem bisherigen Ubuntu-Host beziehungsweise einem Linux-Host mit systemd aktivierst du das einmalig mit:
+
+```sh
+sudo systemctl enable --now docker.service containerd.service
+```
+
+Prüfen lässt sich die Einrichtung mit `systemctl is-enabled docker.service` und `docker inspect --format '{{.HostConfig.RestartPolicy.Name}}' ergo-strava`. Erwartet werden `enabled` und `always`. Die [Docker-Dokumentation](https://docs.docker.com/engine/containers/start-containers-automatically/) beschreibt das Verhalten der Restart-Policies, die [Linux-Einrichtung](https://docs.docker.com/engine/install/linux-postinstall/#configure-docker-to-start-on-boot-with-systemd) den Start des Docker-Dienstes.
+
 ## Aktuelle Hauptbranche als fertiges Image
 
 Das Tag **`main`** enthält den aktuellen getesteten Stand der Hauptbranche. GitHub veröffentlicht es automatisch nach erfolgreichen Tests unter Windows und Linux sowie Offline-Tests der Docker-Images für **Linux amd64 und ARM64**. Es benötigt keinen Release-Tag und lässt sich ohne Anmeldung herunterladen:
