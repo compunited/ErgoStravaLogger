@@ -10,7 +10,7 @@ COPY ErgoStravaLogger/ ErgoStravaLogger/
 RUN case "$TARGETARCH" in amd64) rid=linux-x64;; arm64) rid=linux-arm64;; *) echo "Unsupported architecture: $TARGETARCH" >&2; exit 1;; esac \
     && dotnet publish ErgoStravaLogger/ErgoStravaLogger.csproj -c Release --runtime "$rid" --self-contained false --no-restore -o /app/publish
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:11.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
 COPY LICENSE SECURITY.md THIRD-PARTY-NOTICES.md ./
